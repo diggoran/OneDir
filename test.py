@@ -1,12 +1,7 @@
 __author__ = 'tba5jb'
 
+import requests
 
-"""Tracy Alers (School: tba5jb) (Github: diggoran) has successfully committed"""
-"""___ (School: ___) (Github: ___) has successfully committed"""
-"""___ (School: ___) (Github: ___) has successfully committed"""
-"""___ (School: ___) (Github: ___) has successfully committed"""
-
-if __name__ == '__main__':
-    print "This is just a test file!"
-    print "The cake is a lie!"
-    #Nathan's comment
+if __name__ == "__main__":
+    # response = requests.post("http://127.0.0.1:8000/myapp/list/", files={'testFile.txt': open("testFile.txt",'rb'), 'description': 'upload test'})
+    # print response.content
