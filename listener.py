@@ -43,7 +43,7 @@ class Handler(FileSystemEventHandler):
 
 if __name__ == "__main__":
 
-    path = sys.argv[1] if len(sys.argv) > 1 else '.'
+    path = "C:\Users\Bryon\PycharmProjects\OneDir\watched"
     event_handler = Handler()
     observer = Observer()
     observer.schedule(event_handler, path, recursive=True)
