@@ -26,11 +26,11 @@ class Handler(FileSystemEventHandler):
 
     def on_moved(self, event):
         if (event.is_directory):
-            print ("Directory moved on %s" % time.ctime())
+            print ("Directory renamed on %s" % time.ctime())
             print ("\tFrom:\t %s" % event.src_path)
             print ("\tTo:\t\t %s" % event.dest_path)
         else:
-            print ("File moved on %s" % time.ctime())
+            print ("File renamed on %s" % time.ctime())
             print ("\tFrom:\t %s" % event.src_path)
             print ("\tTo:\t\t %s" % event.dest_path)
 
