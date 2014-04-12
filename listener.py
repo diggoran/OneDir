@@ -3,6 +3,7 @@ __author__ = 'bfs8vb'
 import sys
 import time
 import logging
+import os
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
@@ -43,7 +44,7 @@ class Handler(FileSystemEventHandler):
 
 if __name__ == "__main__":
 
-    path = "C:\Users\Bryon\PycharmProjects\OneDir\watched"
+    path = os.getcwd() + "\watched"
     event_handler = Handler()
     observer = Observer()
     observer.schedule(event_handler, path, recursive=True)
