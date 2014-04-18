@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>View Files</title>
+    </head>
+
+    <body>
+        {% if user.is_authenticated %}
+			{% if user.pk == 1 %}
+			<h1>Hello, Admin user</h1>
+				{% if files %}
+					<ul>
+						{% for file in files %}
+						<li>{{ file.name }}</li>
+						{% endfor %}
+					</ul>
+				{% else %}
+					<strong>There are no files present.</strong>
+				{% endif %}
+				{% if user_list %}
+				<h2>Click on a User to See their Files</h2>
+					<ul>
+						{% for user in user_list %}
+						<li><a href="/files_for_user?id={{user.pk}}">{{ user.username }}</li></a>
+						{% endfor %}
+					</ul>
+				{% else %}
+					<strong>There are no users registered!</strong>
+				{% endif %}
+			{% else %}
+			<h1>Hello, {{ user.username }}</h1>
+			{% endif %}
+		{% else %}
+			<h1>No user Authenticated</h1>
+		{% endif %}
+
+        <a href="/register/">Register Here</a>
+        <a href="/login/">Login</a>
+    </body>
+</html>

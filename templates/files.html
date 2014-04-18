@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>View Files</title>
+    </head>
+    <body>
+		{% if user_id %}
+		<h1>Files associated with user: {{user_name}}</h1>
+		{% endif %}
+        {% if user.is_authenticated %}
+			{% if user.pk == 1 %}
+				{% if files %}
+					<ul>
+						{% for file in files %}
+						<li>{{ file.name }}</li>
+						{% endfor %}
+					</ul>
+				{% else %}
+					<strong>There are no files present.</strong>
+				{% endif %}
+				<h2> Connections from user: {{user_name}} </h2>
+				{% if connections %}
+					<ul>
+						{% for cnxn in connections %}
+						<li>{{ cnxn.time_stamp }}</li>
+						{% endfor %}
+					</ul>
+				{% else %}
+					<strong>There are no connections present.</strong>
+				{% endif %}
+				<h2> Modifications from user: {{user_name}} </h2>
+				{% if mod_dict %}
+					{% for key, val in mod_dict.items %}
+					<h5> {{val.0}}</h5>
+					<ul>
+						{% for mod in val.1 %}
+						<li>{{ mod.time_stamp }}</li>
+						{% endfor %}
+					</ul>
+					{% endfor %}
+				{% else %}
+					<strong>There are no modifications present.</strong>
+				{% endif %}
+			{% else %}
+			<h1>Hello, {{ user.username }}.  Please login with admin account to view files</h1>
+			{% endif %}
+		{% else %}
+			<h1>No user Authenticated</h1>
+		{% endif %}
+
+        <a href="/register/">Register Here</a>
+        <a href="/login/">Login</a>
+    </body>
+</html>
+
+
