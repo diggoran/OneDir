@@ -3,7 +3,6 @@ __author__ = 'bfs8vb'
 from threading import Thread
 import time
 import os
-import random
 from Queue import Queue
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
