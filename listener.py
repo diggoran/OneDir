@@ -4,46 +4,58 @@ import sys
 import time
 import logging
 import os
+import Queue
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
+
+queue = []
 
 class Handler(FileSystemEventHandler):
     def on_modified(self, event):
         if (event.is_directory):
             print ("Directory modified on %s" % time.ctime())
             print ("\t%s" % event.src_path)
+            queue.put(event)
         else:
             print ("File modified on %s" % time.ctime())
             print ("\t%s" % event.src_path)
+            queue.put(event)
 
     def on_created(self, event):
         if (event.is_directory):
             print ("Directory created on %s" % time.ctime())
             print ("\t%s" % event.src_path)
+            queue.put(event)
         else:
             print ("File created on %s" % time.ctime())
             print ("\t%s" % event.src_path)
+            queue.put(event)
 
     def on_moved(self, event):
         if (event.is_directory):
             print ("Directory renamed on %s" % time.ctime())
             print ("\tFrom:\t %s" % event.src_path)
             print ("\tTo:\t\t %s" % event.dest_path)
+            queue.put(event)
         else:
             print ("File renamed on %s" % time.ctime())
             print ("\tFrom:\t %s" % event.src_path)
             print ("\tTo:\t\t %s" % event.dest_path)
+            queue.put(event)
 
     def on_deleted(self, event):
         if (event.is_directory):
             print ("Directory deleted on %s" % time.ctime())
             print ("\t%s" % event.src_path)
+            queue.put(event)
         else:
             print ("File deleted on %s" % time.ctime())
             print ("\t%s" % event.src_path)
+            queue.put(event)
 
 if __name__ == "__main__":
 
+    #global queue
     path = os.getcwd() + "\watched"
     event_handler = Handler()
     observer = Observer()
