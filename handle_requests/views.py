@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, render_to_response
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
@@ -6,7 +6,7 @@ from filetransfers.api import prepare_upload, serve_file
 from handle_requests.forms import UploadForm
 from handle_requests.models import UploadModel
 from django.contrib.auth import authenticate, login
-
+from django.template import RequestContext
 
 @csrf_exempt
 def upload_handler(request):
@@ -38,18 +38,21 @@ def delete_handler(request, pk):
 
 @csrf_exempt
 def login_handler(request):
+    context = RequestContext(request)
     username = request.POST['username']
     password = request.POST['password']
     print username + ", " + password
     user = authenticate(username=username, password=password)
+    status="None"
     if user is not None:
         if user.is_active:
             print "Active User"
             login(request, user)
-            print "Logged In"
+            status = "success"
             # Redirect to a success page.
         else:
-            print "Disabled Account"
+            status = "failure"
     else:
-        print "Invalid Login"
-    return HttpResponseRedirect(reverse('upload.views.upload_handler'))
+        status = "failure"
+    print status
+    return render_to_response('login_result.html', {'status': status}, context)
