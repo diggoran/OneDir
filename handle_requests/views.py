@@ -1,56 +1,52 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
-from filetransfers.api import prepare_upload
+from filetransfers.api import prepare_upload, serve_file
 from handle_requests.forms import UploadForm
+from handle_requests.models import UploadModel
+from django.contrib.auth import authenticate, login
 
 
 @csrf_exempt
-def derp(request):
-    # print "Hello"
-    view_url = reverse('handle_requests.views.derp')
+def upload_handler(request):
+    view_url = reverse('handle_requests.views.upload_handler')
     if request.method == 'POST':
-        # print "Hello!"
-
-        # post = request.POST.copy()
-        # print post
-        # temp = post['key2']
-        # print "2"
-        # post['key2'] = temp.strip('<ul>')
-        # print "3"
-        print request.POST
-        print request.FILES
         form = UploadForm(request.POST, request.FILES)
-        # print form
-        # print form.Meta.__dict__
-        # form = UploadForm(str(form).replace('<ul class="errorlist"><li>This field is required.</li></ul>', '', 1))
-        # print "Hello?"
-        print form
-        print form.Meta.__dict__
-        form.save()
-        # print "Hello!"
-        return HttpResponseRedirect(view_url)
-    # print "Hello"
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(view_url)
     upload_url, upload_data = prepare_upload(request, view_url)
-    # print "Hello!"
     form = UploadForm()
-    # print "Hello!!!"
     return render(request, 'handle_requests/upload.html',
         {'form': form, 'upload_url': upload_url, 'upload_data': upload_data})
 
+def download_handler(request, pk):
+    # upload = get_object_or_404(UploadModel, pk=pk)
+    upload = UploadModel.objects.filter(pk=pk)[0]
+    return serve_file(request, upload.file, save_as=True)
 
-# @csrf_exempt
-# def derp(request):
-#     if request.method == 'POST':
-#         # print request.body
-#         # print request.POST
-#         # form = DocumentForm(request.POST, request.FILES)
-#         # print "Hello"
-#         # if form.is_valid():
-#         print "Hello?"
-#         newdoc = Document(docfile = request.FILES['docfile'])
-#         print "Hello!"
-#         print newdoc
-#             # newdoc.save()
-#     return render(request, 'handle_requests/derp.html')
+def delete_handler(request, pk):
+    if request.method == 'POST':
+        upload = get_object_or_404(UploadForm, pk=pk)
+        upload.file.delete()
+        upload.delete()
+    return HttpResponseRedirect(reverse('upload.views.upload_handler'))
+
+@csrf_exempt
+def login_handler(request):
+    username = request.POST['username']
+    password = request.POST['password']
+    print username + ", " + password
+    user = authenticate(username=username, password=password)
+    if user is not None:
+        if user.is_active:
+            print "Active User"
+            login(request, user)
+            print "Logged In"
+            # Redirect to a success page.
+        else:
+            print "Disabled Account"
+    else:
+        print "Invalid Login"
+    return HttpResponseRedirect(reverse('upload.views.upload_handler'))
