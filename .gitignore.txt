@@ -1,0 +1,4 @@
+database/database.sqlite3
+media/*
+watched/*
+*.pyc

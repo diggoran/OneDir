@@ -19,12 +19,14 @@ def upload_handler(request):
     upload_url, upload_data = prepare_upload(request, view_url)
     form = UploadForm()
     return render(request, 'handle_requests/upload.html',
-        {'form': form, 'upload_url': upload_url, 'upload_data': upload_data})
+                  {'form': form, 'upload_url': upload_url, 'upload_data': upload_data})
+
 
 def download_handler(request, pk):
     # upload = get_object_or_404(UploadModel, pk=pk)
     upload = UploadModel.objects.filter(pk=pk)[0]
     return serve_file(request, upload.file, save_as=True)
+
 
 def delete_handler(request, pk):
     if request.method == 'POST':
@@ -32,6 +34,7 @@ def delete_handler(request, pk):
         upload.file.delete()
         upload.delete()
     return HttpResponseRedirect(reverse('upload.views.upload_handler'))
+
 
 @csrf_exempt
 def login_handler(request):
