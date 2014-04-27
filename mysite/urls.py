@@ -1,7 +1,7 @@
 from django.conf.urls import patterns, include, url
 from django.conf import settings
 from django.contrib import admin
-from onedir import views
+from onedir_app import views
 admin.autodiscover()
 
 urlpatterns = patterns('',
@@ -10,7 +10,7 @@ urlpatterns = patterns('',
     # url(r'^blog/', include('blog.urls')),
 
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^onedir/', include('onedir.urls')),
+    url(r'^onedir/', include('onedir_app.urls')),
     url(r'^register/$', views.register, name='register'),
     url(r'^login/$', views.user_login, name='login'),
     url(r'^files_for_user/$', views.files_for_user, name='files_for_user'),

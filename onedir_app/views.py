@@ -1,8 +1,8 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
 from django.shortcuts import render_to_response
-from onedir.models import File, Modification, Connection
-from onedir.forms import UserForm
+from onedir_app.models import File, Modification, Connection
+from onedir_app.forms import UserForm
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User

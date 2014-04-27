@@ -50,7 +50,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'filetransfers',
     'handle_requests',
-    'onedir'
+    'onedir_app',
 )
 
 MIDDLEWARE_CLASSES = (

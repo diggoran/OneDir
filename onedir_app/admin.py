@@ -1,5 +1,5 @@
 from django.contrib import admin
-from onedir.models import File, Connection, Modification, Access
+from onedir_app.models import File, Connection, Modification, Access
 
 admin.site.register(File)
 admin.site.register(Connection)
