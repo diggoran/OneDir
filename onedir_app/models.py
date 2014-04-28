@@ -14,6 +14,7 @@ class Modification(models.Model):
     file_id = models.IntegerField(default=-1)
     user_id = models.IntegerField(default=-1)
     time_stamp = models.DateTimeField(auto_now_add=True)
+    mod_type = models.CharField(max_length=128)
     def __unicode__(self):
         return str(self.pk)
 
