@@ -21,7 +21,8 @@ from datetime import datetime
 
 def make_dir():
     if not os.path.exists(os.getcwd() + LOCAL_FOLDER):
-        os.mkdir(os.getcwd() + LOCAL_FOLDER)
+        os.umask(0)
+        os.mkdir(os.getcwd() + LOCAL_FOLDER, 0777)
     else:
         print LOCAL_FOLDER + " already exists."
 
@@ -36,7 +37,14 @@ def register(username, password):
 
 def login(username, password):
     data = {'username': username, 'password': password}
+    print data
     response = requests.post(BASE_ADDRESS + "loginrequest/", data=data)
+    if "success" in response:
+        return True
+    return False
+
+def logout():
+    response = requests.post(BASE_ADDRESS + "logoutrequest/", data=data)
     if "success" in response:
         return True
     return False
@@ -56,7 +64,7 @@ if True:#sys.argv[1] == "start":
             username = raw_input()
             print "Please enter your password: "
             password = raw_input()
-            if True:#login(username, password):
+            if login(username, password):
                 make_dir()
                 print "You are now logged in to OneDir and can begin using OneDir. "
                 logged_in = True
@@ -64,22 +72,23 @@ if True:#sys.argv[1] == "start":
                 ConsumerThread().start()
                 print "Syncing: " + str(is_syncing())
         if input == "2":
-            print "Please enter a new username: "
-            username = raw_input()
-            print "Please enter a password: "
-            password = raw_input()
-            print "Please enter password again: "
-            while password != raw_input():
-                print "Your passwords don't match."
-                print "Please enter a password: "
-                password = raw_input()
-                print "Please enter password again: "
-            if register(username, password):
-                make_dir()
-                print "Congrats! You are now registered as a OneDir user and automatically logged in. Begin Using OneDir."
-                logged_in = True
-                ProducerThread().start()
-                ConsumerThread().start()
+            # print "Please enter a new username: "
+            # username = raw_input()
+            # print "Please enter a password: "
+            # password = raw_input()
+            # print "Please enter password again: "
+            # while password != raw_input():
+            #     print "Your passwords don't match."
+            #     print "Please enter a password: "
+            #     password = raw_input()
+            #     print "Please enter password again: "
+            # if register(username, password):
+            #     make_dir()
+            #     print "Congrats! You are now registered as a OneDir user and automatically logged in. Begin Using OneDir."
+                # logged_in = True
+                # ProducerThread().start()
+                # ConsumerThread().start()
+            print "Please register at the following link: " + BASE_ADDRESS + "register/"
         if input == "3":
             syncing = is_syncing()
             if True:#logged_in:
@@ -101,6 +110,7 @@ if True:#sys.argv[1] == "start":
 
         if input == "4":
             if logged_in:
+                logout()
                 logged_in = False
                 print "Logging out of OneDir."
                 print "You can now log in with another account or register a new account."
