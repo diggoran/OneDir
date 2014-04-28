@@ -42,10 +42,16 @@ class ConsumerThread(Thread):
             task = queue.get()
             if task['command'] == 'file_created':
                 with File(open(task['src_path'], 'rb')) as upload:
-                    print "create file!"
-                    data = {'user_id': 'tba5jb', 'path': task['src_path'].rsplit('\\', 1)[0].split(LOCAL_FOLDER, 1)[1].strip('\\')}
+                    data = {'user_id': 'tba5jb', 'path': task['src_path'].rsplit('\\', 1)[0].split(LOCAL_FOLDER, 1)[1].strip('\\').strip('/')}
                     files = {'file': [task['src_path'].rsplit('\\', 1)[1], upload]}
                     requests.post("http://127.0.0.1:8000/upload/", data=data, files=files)
+                    #doesn't like spaces in file name
+                    #can't save to main directory
+                    #putting entire path+filename in the file info makes saving to main but not other folders possible
+                    #working on a fix on Monday
+            # if task['command'] == 'blah':
+            #     data = {'user_id': 'tba5jb', 'path': task['src_path'].rsplit('\\', 1)[0].split(LOCAL_FOLDER, 1)[1].strip('\\')}
+            #     requests.post("http://127.0.0.1:8000/upload/", data=data)
 
 
 class Handler(FileSystemEventHandler):

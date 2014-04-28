@@ -15,7 +15,7 @@ urlpatterns = patterns('',
     url(r'^login/$', views.user_login, name='login'),
     url(r'^files_for_user/$', views.files_for_user, name='files_for_user'),
     url(r'^upload/', 'handle_requests.views.upload_handler'),
-    url(r'^download/(?P<pk>\d+)', 'handle_requests.views.download_handler'),
+    url(r'^download/(?P<file>.+)', 'handle_requests.views.download_handler'),
     url(r'^delete/', 'handle_requests.views.delete_handler'),
     url(r'^loginrequest/', 'handle_requests.views.login_handler'),
 )

@@ -7,6 +7,7 @@ from handle_requests.forms import UploadForm
 from handle_requests.models import UploadModel
 from django.contrib.auth import authenticate, login
 from django.template import RequestContext
+import os
 
 @csrf_exempt
 def upload_handler(request):
@@ -22,10 +23,9 @@ def upload_handler(request):
                   {'form': form, 'upload_url': upload_url, 'upload_data': upload_data})
 
 
-def download_handler(request, pk):
-    # upload = get_object_or_404(UploadModel, pk=pk)
-    upload = UploadModel.objects.filter(pk=pk)[0]
-    return serve_file(request, upload.file, save_as=True)
+def download_handler(request, file):
+    uploads = UploadModel.objects.filter(file=file)
+    return serve_file(request, uploads[0].file, save_as=True)
 
 
 def delete_handler(request, pk):
