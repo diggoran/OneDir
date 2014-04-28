@@ -40,15 +40,28 @@ class ConsumerThread(Thread):
         global queue
         while True:
             task = queue.get()
+            print task['command']
             if task['command'] == 'file_created':
+                print "In If"
                 with File(open(task['src_path'], 'rb')) as upload:
-                    data = {'user_id': 'tba5jb', 'path': task['src_path'].rsplit('/', 1)[0].split(LOCAL_FOLDER, 1)[1].strip('/').strip('/'), 'file_name': 'test.txt', 'username':'admin', 'password':'password', 'size':7}
+                    data = {'user_id': 'admin', 'path': task['src_path'].rsplit('/', 1)[0].split(LOCAL_FOLDER, 1)[1].strip('/').strip('/'), 'file_name': 'test.txt', 'username':'admin', 'password':'password', 'size':7}
                     files = {'file': [task['src_path'].rsplit('/', 1)[1], upload]}
                     requests.post("http://127.0.0.1:8000/upload/", data=data, files=files)
                     #doesn't like spaces in file name
                     #can't save to main directory
                     #putting entire path+filename in the file info makes saving to main but not other folders possible
                     #working on a fix on Monday
+            elif task['command'] == 'file_modified': 
+                with File(open(task['src_path'], 'rb')) as upload:
+                    data = {'user_id': 'tba5jb', 'path': task['src_path'].rsplit('/', 1)[0].split(LOCAL_FOLDER, 1)[1].strip('/').strip('/'), 'file_name': 'test.txt', 'username':'admin', 'password':'password', 'size':7}
+                    files = {'file': [task['src_path'].rsplit('/', 1)[1], upload]}
+                    requests.post("http://127.0.0.1:8000/upload/", data=data, files=files)
+            elif task['command'] == 'file_deleted':
+                print task['src_path']
+                data = {'user_id': 'tba5jb', 'path': task['src_path'].rsplit('/', 1)[0].split(LOCAL_FOLDER, 1)[1].strip('/').strip('/'), 'file_name': task['src_path'].rsplit('/', 1)[1], 'username':'admin', 'password':'password', 'size':7}
+                requests.post("http://127.0.0.1:8000/delete/", data=data)
+            else:    
+                print task['command']
             # if task['command'] == 'blah':
             #     data = {'user_id': 'tba5jb', 'path': task['src_path'].rsplit('\\', 1)[0].split(LOCAL_FOLDER, 1)[1].strip('\\')}
             #     requests.post("http://127.0.0.1:8000/upload/", data=data)
@@ -86,6 +99,7 @@ class Handler(FileSystemEventHandler):
         else:
             queue.put({'command': "file_" + event.event_type, 'src_path': event.src_path,
                        'dest_path': '', 'time': datetime.now()})
+        print event
 
 
 def toggle_sync():

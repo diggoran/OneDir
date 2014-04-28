@@ -12,6 +12,7 @@ import os
 from rest_framework.authtoken.models import Token
 import json
 from django.http import HttpResponse
+from django.conf import settings
 
 def check_auth(username, password, request):
     user = authenticate(username=username, password=password)
@@ -55,24 +56,26 @@ def download_handler(request, file):
     uploads = UploadModel.objects.filter(file=file)
     return serve_file(request, uploads[0].file, save_as=True)
 
-
-def delete_handler(request, pk):
-    user_id = check_auth(username, password, request)
+@csrf_exempt
+def delete_handler(request):
     context = RequestContext(request)
-    username = request.POST['username']
+    username = request.POST['user_name']
     password = request.POST['password']
     path = request.POST['path']
     file_name = request.POST['file_name']
+    user_id = check_auth(username, password, request)
+    full_file_path = username + '/' + path + '/' + file_name
+    #full_file_path = 'tba5jb/derp/something.txt'
     print "USER ID: " + str(user_id)
     if(user_id!=-1):
         if request.method == 'POST':
-            upload = get_object_or_404(UploadForm, pk=pk)
-            upload.file.delete()
-            upload.delete()
-            mod = Modification(file_id = file_object.pk, user_id = user_id, mod_type='delete' )
-            mod.save()
-            u = New.objects.get(pk=id).delete()
-        return HttpResponseRedirect(reverse('upload.views.upload_handler'))
+            #upload = get_object_or_404(UploadForm, file=full_file_path )
+            #upload.file.delete()
+            #upload.delete()
+            os.remove(os.path.join(settings.MEDIA_ROOT, full_file_path))
+            #mod = Modification(file_id = file_object.pk, user_id = user_id, mod_type='delete' )
+            #mod.save()
+        return render(request, 'status.html', {'status': 'success'}, context)
     else:
         return render(request, 'status.html', {'status': 'failure'}, context)
 
