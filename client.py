@@ -26,15 +26,6 @@ def make_dir():
     else:
         print LOCAL_FOLDER + " already exists."
 
-
-def register(username, password):
-    data = {'username': username, 'password': password}
-    response = requests.post(BASE_ADDRESS + "loginrequest/", data=data)
-    if "success" in response:
-        return True
-    return False
-
-
 def login(username, password):
     data = {'username': username, 'password': password}
     print data
@@ -44,7 +35,15 @@ def login(username, password):
     return False
 
 def logout():
-    response = requests.post(BASE_ADDRESS + "logoutrequest/", data=data)
+    response = requests.post(BASE_ADDRESS + "logoutrequest/")
+    if "success" in response:
+        return True
+    return False
+
+def changepassword(username, newpassword):
+    data = {'username': username, 'newpassword':newpassword}
+    print data
+    response = requests.post(BASE_ADDRESS + "change_pass/", data=data)
     if "success" in response:
         return True
     return False
@@ -58,6 +57,8 @@ if True:#sys.argv[1] == "start":
         print "2. Register for a new OneDir account."
         print "3. Turn off On or Off my OneDir Sync"
         print "4. Log out of My OneDir Account."
+        print "5. Change my OneDir password"
+        print "6. Exit OneDir"
         input = raw_input()
         if input == "1":
             print "Please enter your username: "
@@ -120,6 +121,27 @@ if True:#sys.argv[1] == "start":
                 print "You can now log in with another account or register a new account."
             else:
                 print "You cannot log out when you are not logged in."
+
+        if input == "5":
+            if logged_in:
+                print "Please enter your new password: "
+                newpassword = raw_input()
+                print "Please enter your new password again: "
+                newpassword2 = raw_input()
+                while newpassword != newpassword2:
+                    print "Your passwords don't match."
+                    print "Please enter your new password: "
+                    newpassword = raw_input()
+                    print "Please enter your new password again: "
+                    newpassword2 = raw_input()
+                if changepassword(username, newpassword):
+                    print "Your password has been changed."
+            else:
+                print "Please log in to change your password."
+
+        if input == "6":
+            print "program is exiting."
+            os._exit(1)
 
 
 # if __name__ == "__main__":

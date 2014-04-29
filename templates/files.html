@@ -12,7 +12,7 @@
 				{% if files %}
 					<ul>
 						{% for file in files %}
-						<li>{{ file.name }}</li>
+						<li>Name: {{ file.name }}, Path: {{ file.path }}, Size: {{ file.size }}</li>
 						{% endfor %}
 					</ul>
 				{% else %}
@@ -34,7 +34,7 @@
 					<h5> {{val.0}}</h5>
 					<ul>
 						{% for mod in val.1 %}
-						<li>{{ mod.time_stamp }}</li>
+						<li>{{ mod.time_stamp }} ({{ mod.mod_type }})</li>
 						{% endfor %}
 					</ul>
 					{% endfor %}

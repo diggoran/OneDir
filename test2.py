@@ -15,8 +15,12 @@ if __name__ == "__main__":
     # if(command.task == 'newFile'):
     #     files = {'file':[command.file, File(open('test.txt', 'rb'))]}
     #     response = requests.post("http://127.0.0.1:8000/request/", files=files)
-    data = {'username': 'admin', 'password':'password', 'size': 7, 'path': 'derp/file.txt', 'file_name':'file.txt'}
-    files = {'file': ['test.txt', File(open('watched/derp/file.txt', 'rb'))]}
+    # data = {'username': 'admin', 'password':'password', 'size': 7, 'path': 'derp/file.txt', 'file_name':'file.txt'}
+    # files = {'file': ['test.txt', File(open('watched/derp/file.txt', 'rb'))]}
+    # response = requests.post("http://127.0.0.1:8000/upload/", data=data, files=files)
+    # print response.text
+    data = {'username': 'admin', 'path': '', 'password': 'password', 'size': 7, 'file_name': 'somethingnew.txt'}
+    files = {'file': ['somethingnew.txt', File(open('watched/somethingnew.txt', 'rb'))]}
     response = requests.post("http://127.0.0.1:8000/upload/", data=data, files=files)
     print response.text
     # response = requests.post("http://127.0.0.1:8000/request/", data=data, headers=headers, files=files)

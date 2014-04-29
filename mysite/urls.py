@@ -19,6 +19,9 @@ urlpatterns = patterns('',
     url(r'^delete/', 'handle_requests.views.delete_handler'),
     url(r'^loginrequest/', 'handle_requests.views.login_handler'),
     url(r'^latestchanges/', 'handle_requests.views.latest_changes'),
+    url(r'^add_dir/', 'handle_requests.views.add_dir_handler'),
+    url(r'^del_dir/', 'handle_requests.views.del_dir_handler'),
+    url(r'^change_pass/', 'handle_requests.views.pass_change_handler'),
 )
 if settings.DEBUG:
         urlpatterns += patterns(

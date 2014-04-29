@@ -1,5 +1,4 @@
 __author__ = 'kendrickjunerto'
-
 __author__ = 'bfs8vb'
 
 from threading import Thread
@@ -23,6 +22,7 @@ class ProducerThread(Thread):
     def run(self):
         global queue
         global syncing
+        global adding
         path = os.path.join(os.getcwd(), LOCAL_FOLDER)
         while True:
             event_handler = Handler()
@@ -40,6 +40,9 @@ class ProducerThread(Thread):
 class ConsumerThread(Thread):
     def run(self):
         global queue
+        global adding
+        global username = "admin"
+        global password = "password"
         while True:
             task = queue.get()
             print task['command'] + ": " + task['src_path']
@@ -47,7 +50,11 @@ class ConsumerThread(Thread):
                 if task['command'] == 'file_created':
                     print "Adding File!"
                     with File(open(task['src_path'], 'rb')) as upload:
-                        data = {'path': os.path.split(task['src_path'])[0].split(LOCAL_FOLDER, 1)[1].strip('\\').strip('/'), 'file_name': os.path.split(task['src_path'])[1], 'username':'admin', 'password':'password', 'size':7}
+                        print os.path.split(task['src_path'])[1]
+                        path = os.path.split(task['src_path'])[0].split(LOCAL_FOLDER, 1)[1].strip('\\').strip('/')
+                        if path=="":
+                            path = "."
+                        data = {'path': path, 'file_name': os.path.split(task['src_path'])[1], 'username':username, 'password':password, 'size':7}
                         files = {'file': [os.path.split(task['src_path'])[1], upload]}
                         print data
                         requests.post("http://127.0.0.1:8000/upload/", data=data, files=files)
@@ -60,10 +67,10 @@ class ConsumerThread(Thread):
                 elif task['command'] == 'file_modified':
                     if not adding: 
                         print "Modifying File!"
-                        data = {'user_name': 'admin', 'path': task['src_path'].rsplit('/', 1)[0].split(LOCAL_FOLDER, 1)[1].strip('/').strip('/'), 'file_name': task['src_path'].rsplit('/', 1)[1], 'password':'password'}
+                        data = {'user_name': username, 'path': task['src_path'].rsplit('/', 1)[0].split(LOCAL_FOLDER, 1)[1].strip('/').strip('/'), 'file_name': task['src_path'].rsplit('/', 1)[1], 'password':password}
                         requests.post("http://127.0.0.1:8000/delete/", data=data)
                         with File(open(task['src_path'], 'rb')) as upload:
-                            data = {'path': os.path.split(task['src_path'])[0].split(LOCAL_FOLDER, 1)[1].strip('\\').strip('/'), 'file_name': os.path.split(task['src_path'])[1], 'user_name':'admin', 'password':'password', 'size':7}
+                            data = {'path': os.path.split(task['src_path'])[0].split(LOCAL_FOLDER, 1)[1].strip('\\').strip('/'), 'file_name': os.path.split(task['src_path'])[1], 'user_name':username, 'password':password, 'size':7}
                             print data
                             files = {'file': [os.path.split(task['src_path'])[1], upload]}
                             requests.post("http://127.0.0.1:8000/upload/", data=data, files=files)
@@ -75,8 +82,55 @@ class ConsumerThread(Thread):
                     # print task['src_path']
                     # print task['src_path'].rsplit('/', 1)[0].split(LOCAL_FOLDER, 1)[1].strip('/').strip('/')
                     # print task['src_path'].rsplit('/', 1)[1]
-                    data = {'user_name': 'admin', 'path': task['src_path'].rsplit('/', 1)[0].split(LOCAL_FOLDER, 1)[1].strip('/').strip('/'), 'file_name': task['src_path'].rsplit('/', 1)[1], 'password':'password'}
+                    data = {'user_name': username, 'path': task['src_path'].rsplit('/', 1)[0].split(LOCAL_FOLDER, 1)[1].strip('/').strip('/'), 'file_name': task['src_path'].rsplit('/', 1)[1], 'password':password}
+                    print data
                     requests.post("http://127.0.0.1:8000/delete/", data=data)
+                elif task['command'] == 'dir_created':
+                    print "creating directory"
+                    print LOCAL_FOLDER
+                    print task['src_path'].rsplit('/', 1)[0].split(LOCAL_FOLDER, 1)
+                    # print task['src_path']
+                    # print task['src_path'].rsplit('/', 1)[0].split(LOCAL_FOLDER, 1)[1].strip('/').strip('/')
+                    # print task['src_path'].rsplit('/', 1)[1]
+                    data = {'username': username, 'path': task['src_path'].rsplit('/', 1)[0].split(LOCAL_FOLDER, 1)[1].strip('/').strip('/'), 'file_name': task['src_path'].rsplit('/', 1)[1], 'password':password}
+                    print data
+                    requests.post("http://127.0.0.1:8000/add_dir/", data=data)
+                elif task['command'] == 'dir_deleted':
+                    print "delete directory"
+                    print LOCAL_FOLDER
+                    print task['src_path'].rsplit('/', 1)[0].split(LOCAL_FOLDER, 1)
+                    # print task['src_path']
+                    # print task['src_path'].rsplit('/', 1)[0].split(LOCAL_FOLDER, 1)[1].strip('/').strip('/')
+                    # print task['src_path'].rsplit('/', 1)[1]
+                    data = {'username': username, 'path': task['src_path'].rsplit('/', 1)[0].split(LOCAL_FOLDER, 1)[1].strip('/').strip('/'), 'file_name': task['src_path'].rsplit('/', 1)[1], 'password':password}
+                    print data
+                    requests.post("http://127.0.0.1:8000/del_dir/", data=data)
+                elif task['command'] == 'file_moved':
+                    print "-----------file moved --------------"
+                    print LOCAL_FOLDER
+                    print "DEST PATH: " + task['dest_path']
+                    print "SRC PATH: " + task['src_path']   
+                    print task['src_path'].rsplit('/', 1)[0].split(LOCAL_FOLDER, 1)
+                    data = {'user_name': username, 'path': task['src_path'].rsplit('/', 1)[0].split(LOCAL_FOLDER, 1)[1].strip('/').strip('/'), 'file_name': task['src_path'].rsplit('/', 1)[1], 'password':password}
+                    requests.post("http://127.0.0.1:8000/delete/", data=data)
+                    with File(open(task['dest_path'], 'rb')) as upload:
+                        data = {'path': os.path.split(task['dest_path'])[0].split(LOCAL_FOLDER, 1)[1].strip('\\').strip('/'), 'file_name': os.path.split(task['dest_path'])[1], 'user_name':admin, 'password':password, 'size':7}
+                        print data
+                        files = {'file': [os.path.split(task['dest_path'])[1], upload]}
+                        requests.post("http://127.0.0.1:8000/upload/", data=data, files=files)
+                    # print ta
+                elif task['command'] == 'dir_moved':
+                    print "-----------dir moved --------------"
+                    print LOCAL_FOLDER
+                    print "DEST PATH: " + task['dest_path']
+                    print "SRC PATH: " + task['src_path']                   
+                    print task['src_path'].rsplit('/', 1)[0].split(LOCAL_FOLDER, 1)
+                    data = {'username': username, 'path': task['dest_path'].rsplit('/', 1)[0].split(LOCAL_FOLDER, 1)[1].strip('/').strip('/'), 'file_name': task['dest_path'].rsplit('/', 1)[1], 'password':password}
+                    requests.post("http://127.0.0.1:8000/add_dir/", data=data)
+                    data = {'username': username, 'path': task['src_path'].rsplit('/', 1)[0].split(LOCAL_FOLDER, 1)[1].strip('/').strip('/'), 'file_name': task['src_path'].rsplit('/', 1)[1], 'password':password}
+                    print data
+                    requests.post("http://127.0.0.1:8000/del_dir/", data=data)
+                    # print ta
                 else:    
                     print "--" + task['command'] + "--"
             # if task['command'] == 'blah':
@@ -136,10 +190,10 @@ def update_files(username):
         path = r
         with open('watched/'+path, 'wb') as handle:
             #print 'http://127.0.0.1:8000/download/'+username+'/'+path
-            response = requests.get('http://127.0.0.1:8000/download/'+username+'/'+ path, stream=True)
+            response = requests.get('http://127.0.0.1:8000/download/'+username+''+ path, stream=True)
             if not response.ok:
                 # Something went wrong
-                print "something went wrong"
+                print 
             for block in response.iter_content(1024):
                 if not block:
                     break

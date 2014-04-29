@@ -3,8 +3,11 @@ from django import forms
 from handle_requests.models import UploadModel
 
 class UploadForm(forms.ModelForm):
-    user_id = forms.TextInput()
+    username = forms.TextInput()
     path = forms.TextInput()
+    file_name = forms.TextInput()
+    size = forms.IntegerField()
+    password = forms.TextInput()
     file = forms.FileField(
         label='Select a file'
     )

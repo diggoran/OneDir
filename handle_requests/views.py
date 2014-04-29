@@ -13,6 +13,7 @@ from rest_framework.authtoken.models import Token
 import json
 from django.http import HttpResponse
 from django.conf import settings
+from django.contrib.auth.models import User
 
 def check_auth(username, password, request):
     user = authenticate(username=username, password=password)
@@ -22,42 +23,73 @@ def check_auth(username, password, request):
             return user.id
     return -1
 
+# @csrf_exempt
+# def upload_handler(request):
+#     context = RequestContext(request)
+#     view_url = reverse('handle_requests.views.upload_handler')
+#     print view_url
+#     username = request.POST['username']
+#     password = request.POST['password']
+#     file_name = request.POST['file_name']
+#     size = request.POST['size']
+#     path = request.POST['path']
+#     user_id = check_auth(username, password, request)
+#     print "USER ID: " + str(user_id)
+#     if(user_id!=-1):
+#         if request.method == 'POST':
+#             form = UploadForm(request.POST, request.FILES)
+#             print request.FILES
+#             if form.is_valid():
+#                 form.save()
+#                 return HttpResponseRedirect(view_url)
+#             else:
+#                 print "Invalid"
+#         upload_url, upload_data = prepare_upload(request, view_url)
+#         print upload_url
+#         print upload_data
+#         form = UploadForm()
+#         file_object = File(name=file_name, path = path, user_id = user_id, size=size )
+#         file_object.save()
+#         print file_object
+#         mod = Modification(file_id = file_object.pk, user_id = user_id, mod_type='add')
+#         mod.save()
+#         print mod
+#         return render(request, 'handle_requests/upload.html',
+#                       {'form': form, 'upload_url': upload_url, 'upload_data': upload_data})
+#     else:
+#         return render(request, 'status.html', {'status': 'failure'})
+
 @csrf_exempt
 def upload_handler(request):
     context = RequestContext(request)
     view_url = reverse('handle_requests.views.upload_handler')
     print view_url
-    username = request.POST['username']
-    password = request.POST['password']
-    file_name = request.POST['file_name']
-    size = request.POST['size']
-    path = request.POST['path']
-    user_id = check_auth(username, password, request)
-    print "USER ID: " + str(user_id)
-    if(user_id!=-1):
-        if request.method == 'POST':
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        user_id = check_auth(username, password, request)
+        print "USER ID: " + str(user_id)
+        if(user_id!=-1):
+            file_name = request.POST['file_name']
+            size = request.POST['size']
+            path = request.POST['path']
             form = UploadForm(request.POST, request.FILES)
             print request.FILES
-            if form.is_valid():
-                form.save()
-                return HttpResponseRedirect(view_url)
-            else:
-                print "Invalid"
-        upload_url, upload_data = prepare_upload(request, view_url)
-        print upload_url
-        print upload_data
-        form = UploadForm()
-        file_object = File(name=file_name, path = path, user_id = user_id, size=size )
-        file_object.save()
-        print file_object
-        mod = Modification(file_id = file_object.pk, user_id = user_id, mod_type='add')
-        mod.save()
-        print mod
-        return render(request, 'handle_requests/upload.html',
-                      {'form': form, 'upload_url': upload_url, 'upload_data': upload_data})
-    else:
-        return render(request, 'status.html', {'status': 'failure'})
-
+            print request.POST
+            form.save()
+            file_object = File(name=file_name, path = path, user_id = user_id, size=size )
+            file_object.save()
+            mod = Modification(file_id = file_object.pk, user_id = user_id, mod_type='add')
+            mod.save()
+            return render(request, 'status.html', {'status': 'upload successful'})
+        else:
+            return render(request, 'status.html', {'status': 'login failure'})
+    form = UploadForm()
+    upload_url, upload_data = prepare_upload(request, view_url)
+    print upload_url
+    print upload_data
+    return render(request, 'handle_requests/upload.html',
+                  {'form': form, 'upload_url': upload_url, 'upload_data': upload_data})
 
 def download_handler(request, file):
     uploads = UploadModel.objects.filter(file=file)
@@ -91,6 +123,56 @@ def delete_handler(request):
     else:
         return render(request, 'status.html', {'status': 'failure'})
 
+@csrf_exempt
+def add_dir_handler(request):
+    context = RequestContext(request)
+    username = request.POST['username']
+    password = request.POST['password']
+    path = request.POST['path']
+    filename = request.POST['file_name']
+    user_id = check_auth(username, password, request)
+    full_file_path = username + '/' + path + '/' + filename
+    #full_file_path = 'tba5jb/derp/something.txt'
+    print "USER ID: " + str(user_id)
+    if(user_id!=-1):
+        if request.method == 'POST':
+            #upload = get_object_or_404(UploadForm, file=full_file_path )
+            #upload.file.delete()
+            #upload.delete()
+            print path
+            os.mkdir(os.path.join(settings.MEDIA_ROOT, full_file_path))
+            mod = Modification(file_id = -1, user_id = user_id, mod_type='add_directory' )
+            mod.save()
+        return render(request, 'status.html', {'status': 'success'})
+    else:
+        return render(request, 'status.html', {'status': 'failure'})
+
+@csrf_exempt
+def del_dir_handler(request):
+    context = RequestContext(request)
+    username = request.POST['username']
+    password = request.POST['password']
+    path = request.POST['path']
+    filename = request.POST['file_name']
+    user_id = check_auth(username, password, request)
+    if(path != ''):
+        full_file_path = username + '/' + path + '/' + filename
+    else:
+        full_file_path = username + '/' + filename
+    #full_file_path = 'tba5jb/derp/something.txt'
+    print "USER ID: " + str(user_id)
+    if(user_id!=-1):
+        if request.method == 'POST':
+            #upload = get_object_or_404(UploadForm, file=full_file_path )
+            #upload.file.delete()
+            #upload.delete()
+            print path
+            os.removedirs(os.path.join(settings.MEDIA_ROOT, full_file_path))
+            mod = Modification(file_id = -1, user_id = user_id, mod_type='del_directory' )
+            mod.save()
+        return render(request, 'status.html', {'status': 'success'})
+    else:
+        return render(request, 'status.html', {'status': 'failure'})
 
 @csrf_exempt
 def login_handler(request):
@@ -157,3 +239,12 @@ def latest_changes(request):
     response_data = {}
     response_data['files'] = file_paths
     return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+@csrf_exempt
+def pass_change_handler(request):
+    username = request.POST['username']
+    new_password = request.POST['newpassword']
+    user = User.objects.get(username = username)
+    user.set_password(new_password)
+    user.save()
+    return render(request, 'status.html', {'status': 'success'})
