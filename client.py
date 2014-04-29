@@ -3,7 +3,7 @@ __author__ = 'kendrickjunerto'
 __author__ = 'bfs8vb'
 
 import os
-from onedir import ProducerThread, ConsumerThread, toggle_sync, is_syncing, queue
+from onedir import ProducerThread, ConsumerThread, toggle_sync, is_syncing, queue, update_files
 import sys
 from threading import Thread
 import shutil
@@ -71,6 +71,8 @@ if True:#sys.argv[1] == "start":
                 ProducerThread().start()
                 ConsumerThread().start()
                 print "Syncing: " + str(is_syncing())
+            else:
+                print "Invalid"
         if input == "2":
             # print "Please enter a new username: "
             # username = raw_input()
@@ -91,7 +93,7 @@ if True:#sys.argv[1] == "start":
             print "Please register at the following link: " + BASE_ADDRESS + "register/"
         if input == "3":
             syncing = is_syncing()
-            if True:#logged_in:
+            if logged_in:
                 if syncing:
                     print "Sync is being turned off. All modifications will not be recorded from now on."
                     toggle_sync()
@@ -104,6 +106,8 @@ if True:#sys.argv[1] == "start":
                 else:
                     print "Now turning on sync. All modifications will be recorded from now on."
                     toggle_sync()
+                    print "Updating your files!"
+                    update_files('admin')
                     print is_syncing()
             else:
                 print "Please login to OneDir or register for a new account with OneDir."

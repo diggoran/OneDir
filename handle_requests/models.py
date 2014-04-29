@@ -2,7 +2,9 @@
 from django.db import models
 import os
 
-def get_upload_path(instance, filename):
+def get_upload_path(instance, filename): 
+    if instance.path == "":
+	    return os.path.join("%s" % instance.user_id, "%s" % filename)
     return os.path.join("%s" % instance.user_id, "%s" % instance.path, filename)
 
 class UploadModel(models.Model):

@@ -18,6 +18,7 @@ urlpatterns = patterns('',
     url(r'^download/(?P<file>.+)', 'handle_requests.views.download_handler'),
     url(r'^delete/', 'handle_requests.views.delete_handler'),
     url(r'^loginrequest/', 'handle_requests.views.login_handler'),
+    url(r'^latestchanges/', 'handle_requests.views.latest_changes'),
 )
 if settings.DEBUG:
         urlpatterns += patterns(
