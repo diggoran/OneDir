@@ -69,7 +69,9 @@ if True:#sys.argv[1] == "start":
                 make_dir()
                 print "You are now logged in to OneDir and can begin using OneDir. "
                 logged_in = True
-                ProducerThread().start()
+                pt = ProducerThread()
+                pt.login(username, password)
+                pt.start()
                 ConsumerThread().start()
                 print "Syncing: " + str(is_syncing())
             else:

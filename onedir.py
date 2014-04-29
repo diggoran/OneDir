@@ -16,6 +16,7 @@ import json
 queue = Queue(10)
 syncing = True
 adding = False
+need_to_delete = True
 
 
 class ProducerThread(Thread):
@@ -36,6 +37,12 @@ class ProducerThread(Thread):
                 observer.stop()
             observer.join()
 
+    def login(self, username_in, password_in):
+        global username
+        username = username_in
+        global password
+        password = password_in
+
 
 class ConsumerThread(Thread):
     def run(self):
@@ -43,8 +50,9 @@ class ConsumerThread(Thread):
         global adding
         global username
         global password
-        username = "admin"
-        password = "password"
+        global need_to_delete
+        #username = "admin"
+        #password = "password"
         while True:
             task = queue.get()
             print task['command'] + ": " + task['src_path']
