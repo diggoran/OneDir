@@ -41,8 +41,10 @@ class ConsumerThread(Thread):
     def run(self):
         global queue
         global adding
-        global username = "admin"
-        global password = "password"
+        global username
+        global password
+        username = "admin"
+        password = "password"
         while True:
             task = queue.get()
             print task['command'] + ": " + task['src_path']
