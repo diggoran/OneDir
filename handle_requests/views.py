@@ -131,7 +131,7 @@ def add_dir_handler(request):
     path = request.POST['path']
     filename = request.POST['file_name']
     user_id = check_auth(username, password, request)
-    full_file_path = username + '/' + path + '/' + filename
+    full_file_path = os.path.join(username, path, filename)
     #full_file_path = 'tba5jb/derp/something.txt'
     print "USER ID: " + str(user_id)
     if(user_id!=-1):
@@ -189,6 +189,8 @@ def login_handler(request):
             login(request, user)
             status = "success"
             print request.user.is_authenticated()
+            if not os.path.isdir(os.path.join(settings.MEDIA_ROOT, username)):
+                os.mkdir(os.path.join(settings.MEDIA_ROOT, username))
             # token = Token.objects.get(user=user)
             # print token.key
             # key1=token.key
@@ -247,4 +249,5 @@ def pass_change_handler(request):
     user = User.objects.get(username = username)
     user.set_password(new_password)
     user.save()
+    print "PASSWORD:" + user.password
     return render(request, 'status.html', {'status': 'success'})

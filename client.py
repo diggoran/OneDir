@@ -41,6 +41,7 @@ def logout():
     return False
 
 def changepassword(username, newpassword):
+    #hash = pass_context.encrypt(newpassword)
     data = {'username': username, 'newpassword':newpassword}
     print data
     response = requests.post(BASE_ADDRESS + "change_pass/", data=data)

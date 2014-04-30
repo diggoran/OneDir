@@ -3,6 +3,7 @@ __author__ = 'tba5jb'
 import requests
 from django.core.files import File
 from django.core.files.uploadedfile import SimpleUploadedFile
+from path import LOCAL_FOLDER, BASE_ADDRESS
 import json
 
 if __name__ == "__main__":
@@ -19,8 +20,8 @@ if __name__ == "__main__":
     # files = {'file': ['test.txt', File(open('watched/derp/file.txt', 'rb'))]}
     # response = requests.post("http://127.0.0.1:8000/upload/", data=data, files=files)
     # print response.text
-    data = {'username': 'admin', 'path': '', 'password': 'password', 'size': 7, 'file_name': 'somethingnew.txt'}
-    files = {'file': ['somethingnew.txt', File(open('watched/somethingnew.txt', 'rb'))]}
-    response = requests.post("http://127.0.0.1:8000/upload/", data=data, files=files)
+    data = {'username': 'admin', 'path': '', 'password': 'password', 'size': 7, 'file_name': 'derp.txt'}
+    files = {'file': ['derp.txt', File(open('watched/derp.txt', 'rb'))]}
+    response = requests.post(BASE_ADDRESS + "upload/", data=data, files=files)
     print response.text
     # response = requests.post("http://127.0.0.1:8000/request/", data=data, headers=headers, files=files)
