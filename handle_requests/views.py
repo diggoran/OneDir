@@ -15,6 +15,7 @@ from django.http import HttpResponse
 from django.conf import settings
 from django.contrib.auth.models import User
 
+
 def check_auth(username, password, request):
     user = authenticate(username=username, password=password)
     if user is not None:
@@ -23,45 +24,9 @@ def check_auth(username, password, request):
             return user.id
     return -1
 
-# @csrf_exempt
-# def upload_handler(request):
-#     context = RequestContext(request)
-#     view_url = reverse('handle_requests.views.upload_handler')
-#     print view_url
-#     username = request.POST['username']
-#     password = request.POST['password']
-#     file_name = request.POST['file_name']
-#     size = request.POST['size']
-#     path = request.POST['path']
-#     user_id = check_auth(username, password, request)
-#     print "USER ID: " + str(user_id)
-#     if(user_id!=-1):
-#         if request.method == 'POST':
-#             form = UploadForm(request.POST, request.FILES)
-#             print request.FILES
-#             if form.is_valid():
-#                 form.save()
-#                 return HttpResponseRedirect(view_url)
-#             else:
-#                 print "Invalid"
-#         upload_url, upload_data = prepare_upload(request, view_url)
-#         print upload_url
-#         print upload_data
-#         form = UploadForm()
-#         file_object = File(name=file_name, path = path, user_id = user_id, size=size )
-#         file_object.save()
-#         print file_object
-#         mod = Modification(file_id = file_object.pk, user_id = user_id, mod_type='add')
-#         mod.save()
-#         print mod
-#         return render(request, 'handle_requests/upload.html',
-#                       {'form': form, 'upload_url': upload_url, 'upload_data': upload_data})
-#     else:
-#         return render(request, 'status.html', {'status': 'failure'})
 
 @csrf_exempt
 def upload_handler(request):
-    context = RequestContext(request)
     view_url = reverse('handle_requests.views.upload_handler')
     print view_url
     if request.method == 'POST':
@@ -69,7 +34,7 @@ def upload_handler(request):
         password = request.POST['password']
         user_id = check_auth(username, password, request)
         print "USER ID: " + str(user_id)
-        if(user_id!=-1):
+        if user_id is not -1:
             file_name = request.POST['file_name']
             size = request.POST['size']
             path = request.POST['path']
@@ -91,9 +56,13 @@ def upload_handler(request):
     return render(request, 'handle_requests/upload.html',
                   {'form': form, 'upload_url': upload_url, 'upload_data': upload_data})
 
-def download_handler(request, file):
-    uploads = UploadModel.objects.filter(file=file)
+
+def download_handler(request, username_path_file):
+    if username_path_file.count('/') is 1:
+        username_path_file = username_path_file.replace('/', '/./')
+    uploads = UploadModel.objects.filter(file=username_path_file)
     return serve_file(request, uploads[0].file, save_as=True)
+
 
 @csrf_exempt
 def delete_handler(request):
@@ -106,7 +75,7 @@ def delete_handler(request):
     full_file_path = username + '/' + path + '/' + file_name
     #full_file_path = 'tba5jb/derp/something.txt'
     print "USER ID: " + str(user_id)
-    if(user_id!=-1):
+    if user_id is not -1:
         if request.method == 'POST':
             #upload = get_object_or_404(UploadForm, file=full_file_path )
             #upload.file.delete()
@@ -123,6 +92,7 @@ def delete_handler(request):
     else:
         return render(request, 'status.html', {'status': 'failure'})
 
+
 @csrf_exempt
 def add_dir_handler(request):
     context = RequestContext(request)
@@ -134,7 +104,7 @@ def add_dir_handler(request):
     full_file_path = os.path.join(username, path, filename)
     #full_file_path = 'tba5jb/derp/something.txt'
     print "USER ID: " + str(user_id)
-    if(user_id!=-1):
+    if user_id is not -1:
         if request.method == 'POST':
             #upload = get_object_or_404(UploadForm, file=full_file_path )
             #upload.file.delete()
@@ -147,6 +117,7 @@ def add_dir_handler(request):
     else:
         return render(request, 'status.html', {'status': 'failure'})
 
+
 @csrf_exempt
 def del_dir_handler(request):
     context = RequestContext(request)
@@ -155,13 +126,13 @@ def del_dir_handler(request):
     path = request.POST['path']
     filename = request.POST['file_name']
     user_id = check_auth(username, password, request)
-    if(path != ''):
+    if path != '':
         full_file_path = username + '/' + path + '/' + filename
     else:
         full_file_path = username + '/' + filename
     #full_file_path = 'tba5jb/derp/something.txt'
     print "USER ID: " + str(user_id)
-    if(user_id!=-1):
+    if user_id is not -1:
         if request.method == 'POST':
             #upload = get_object_or_404(UploadForm, file=full_file_path )
             #upload.file.delete()
@@ -174,6 +145,7 @@ def del_dir_handler(request):
     else:
         return render(request, 'status.html', {'status': 'failure'})
 
+
 @csrf_exempt
 def login_handler(request):
     context = RequestContext(request)
@@ -181,13 +153,13 @@ def login_handler(request):
     password = request.POST['password']
     print username + ", " + password
     user = authenticate(username=username, password=password)
-    status="None"
-    key1 = ""
+    key1 = ''
+    status = 'failure'
     if user is not None:
         if user.is_active:
             print "Active User"
             login(request, user)
-            status = "success"
+            status = 'success'
             print request.user.is_authenticated()
             if not os.path.isdir(os.path.join(settings.MEDIA_ROOT, username)):
                 os.mkdir(os.path.join(settings.MEDIA_ROOT, username))
@@ -197,14 +169,11 @@ def login_handler(request):
             cxn = Connection(user_id=user.id)
             cxn.save()
             # Redirect to a success page.
-        else:
-            status = "failure"
-    else:
-        status = "failure"
     print status
     print get_client_ip(request)
     #print request.META['HTTP_X_FORWARDED_FOR']
     return render_to_response('login_result.html', {'status': status, 'token': key1}, context)
+
 
 @csrf_exempt
 def logout_handler(request):
@@ -218,6 +187,7 @@ def logout_handler(request):
         status= "no login"
     return render_to_response('logout_result.html', context)
 
+
 def get_client_ip(request):
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
     if x_forwarded_for:
@@ -228,19 +198,31 @@ def get_client_ip(request):
         print "In else"  
     return ip
 
+
 @csrf_exempt
 def latest_changes(request):
-    #timestamp = request.POST['timestamp']
-    #latest_mods = Modification.objects.filter(time_stamp__gte=timestamp, user_id = 1)
-    file_objects = File.objects.filter(user_id=1)
-    file_paths = []
-    username = "admin"
-    for f in file_objects:
-        file_paths.append(str(f.path + '/' + f.name))
-    print file_paths
-    response_data = {}
-    response_data['files'] = file_paths
-    return HttpResponse(json.dumps(response_data), content_type="application/json")
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        #timestamp = request.POST['timestamp']
+        user_id = check_auth(username, password, request)
+        print "USER ID: " + str(user_id)
+        if user_id is not -1:
+            #latest_mods = Modification.objects.filter(user_id=user_id, time_stamp__gte=timestamp)
+            file_objects = File.objects.filter(user_id=user_id)#, time_stamp__gte=timestamp)
+            file_paths = []
+            for f in file_objects:
+                if f.path == '.':
+                    file_paths.append(f.name)
+                else:
+                    file_paths.append(os.path.join(f.path, f.name))
+            response_data = {'files': file_paths}
+            print json.dumps(response_data)
+            return HttpResponse(json.dumps(response_data), content_type="application/json")
+        else:
+            return render(request, 'status.html', {'status': 'login failure'})
+    return render(request, 'index.html')
+
 
 @csrf_exempt
 def pass_change_handler(request):

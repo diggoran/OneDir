@@ -47,6 +47,7 @@ class ConsumerThread(Thread):
     def run(self):
         global queue
         global adding
+        global syncing
         global username
         global password
         global need_to_delete
@@ -55,13 +56,13 @@ class ConsumerThread(Thread):
         while True:
             task = queue.get()
             print task['command'] + ": " + task['src_path']
-            if "goutputstream" not in task['src_path']:
+            if "goutputstream" not in task['src_path'] and syncing:
                 if task['command'] == 'file_created':
                     print "Adding File!"
                     with File(open(task['src_path'], 'rb')) as upload:
                         print os.path.split(task['src_path'])[1]
                         path = os.path.split(task['src_path'])[0].split(LOCAL_FOLDER, 1)[1].strip('\\').strip('/')
-                        if path=="":
+                        if path == "":
                             path = "."
                         data = {'path': path, 'file_name': os.path.split(task['src_path'])[1], 'username':username, 'password':password, 'size':7}
                         files = {'file': [os.path.split(task['src_path'])[1], upload]}
@@ -79,7 +80,7 @@ class ConsumerThread(Thread):
                         data = {'user_name': username, 'path': task['src_path'].rsplit('/', 1)[0].split(LOCAL_FOLDER, 1)[1].strip('/').strip('/'), 'file_name': task['src_path'].rsplit('/', 1)[1], 'password':password}
                         requests.post(BASE_ADDRESS + "delete/", data=data)
                         with File(open(task['src_path'], 'rb')) as upload:
-                            data = {'path': os.path.split(task['src_path'])[0].split(LOCAL_FOLDER, 1)[1].strip('\\').strip('/'), 'file_name': os.path.split(task['src_path'])[1], 'user_name':username, 'password':password, 'size':7}
+                            data = {'path': os.path.split(task['src_path'])[0].split(LOCAL_FOLDER, 1)[1].strip('\\').strip('/'), 'file_name': os.path.split(task['src_path'])[1], 'username':username, 'password':password, 'size':7}
                             print data
                             files = {'file': [os.path.split(task['src_path'])[1], upload]}
                             requests.post(BASE_ADDRESS + "upload/", data=data, files=files)
@@ -123,10 +124,14 @@ class ConsumerThread(Thread):
                     data = {'user_name': username, 'path': task['src_path'].rsplit('/', 1)[0].split(LOCAL_FOLDER, 1)[1].strip('/').strip('/'), 'file_name': task['src_path'].rsplit('/', 1)[1], 'password':password}
                     requests.post(BASE_ADDRESS + "delete/", data=data)
                     with File(open(task['dest_path'], 'rb')) as upload:
-                        data = {'path': os.path.split(task['dest_path'])[0].split(LOCAL_FOLDER, 1)[1].strip('\\').strip('/'), 'file_name': os.path.split(task['dest_path'])[1], 'user_name':username, 'password':password, 'size':7}
+                        data = {'path': os.path.split(task['dest_path'])[0].split(LOCAL_FOLDER, 1)[1].strip('\\').strip('/'), 'file_name': os.path.split(task['dest_path'])[1], 'username':username, 'password':password, 'size':7}
                         print data
                         files = {'file': [os.path.split(task['dest_path'])[1], upload]}
                         requests.post(BASE_ADDRESS + "upload/", data=data, files=files)
+                    if os.listdir(task['src_path']) == []:
+                        data = {'username': username, 'path': task['src_path'].rsplit('/', 1)[0].split(LOCAL_FOLDER, 1)[1].strip('/').strip('/'), 'file_name': task['src_path'].rsplit('/', 1)[1], 'password':password}
+                        print data
+                        requests.post(BASE_ADDRESS + "del_dir/", data=data)
                     # print ta
                 elif task['command'] == 'dir_moved':
                     print "-----------dir moved --------------"
@@ -143,9 +148,6 @@ class ConsumerThread(Thread):
                     # print ta
                 else:    
                     print "--" + task['command'] + "--"
-            # if task['command'] == 'blah':
-            #     data = {'user_id': 'tba5jb', 'path': task['src_path'].rsplit('\\', 1)[0].split(LOCAL_FOLDER, 1)[1].strip('\\')}
-            #     requests.post("http://127.0.0.1:8000/upload/", data=data)
 
 
 class Handler(FileSystemEventHandler):
@@ -187,27 +189,28 @@ def toggle_sync():
     global syncing
     syncing = not syncing
 
-def update_files(username):
-    today = datetime.now()
-    dt=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+def update_files(username_in, password_in):
+    # today = datetime.now()
+    dt = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     print dt
-    data = {'timestamp': dt}
+    data = {'username': username_in, 'password': password_in}#, 'timestamp': dt}
     response = requests.post("http://127.0.0.1:8000/latestchanges/", data=data)
     print response.text
-    result=json.loads(response.text)
-    for r in result['files']:
-        file_name = r.split('/')[-1]
-        path = r
-        with open('watched/'+path, 'wb') as handle:
-            #print 'http://127.0.0.1:8000/download/'+username+'/'+path
-            response = requests.get('http://127.0.0.1:8000/download/'+username+''+ path, stream=True)
+    result = json.loads(response.text)
+    for f in result['files']:
+        if not os.path.exists(os.path.join(LOCAL_FOLDER, os.path.dirname(f))):
+            os.makedirs(os.path.join(LOCAL_FOLDER, os.path.dirname(f)))
+        with open(os.path.join(LOCAL_FOLDER, f), 'wb') as handle:
+            print 'http://127.0.0.1:8000/download/' + username_in + '/' + f
+            response = requests.get('http://127.0.0.1:8000/download/' + username_in + '/' + f, stream=True)
             if not response.ok:
-                # Something went wrong
-                print 
+                print "Error in update_files: Something went wrong"
             for block in response.iter_content(1024):
                 if not block:
                     break
                 handle.write(block) 
+
 
 def is_syncing():
     global syncing

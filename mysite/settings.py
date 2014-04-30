@@ -51,6 +51,7 @@ INSTALLED_APPS = (
     'filetransfers',
     'handle_requests',
     'onedir_app',
+    'django_cleanup',
 )
 
 MIDDLEWARE_CLASSES = (
