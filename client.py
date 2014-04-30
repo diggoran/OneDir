@@ -28,7 +28,7 @@ def make_dir():
 
 def login(username_in, password_in):
     data = {'username': username_in, 'password': password_in}
-    print data
+    # print data
     response = requests.post(BASE_ADDRESS + "loginrequest/", data=data)
     if "success" in response:
         return True
@@ -43,7 +43,7 @@ def logout():
 def changepassword(username, newpassword):
     #hash = pass_context.encrypt(newpassword)
     data = {'username': username, 'newpassword':newpassword}
-    print data
+    # print data
     response = requests.post(BASE_ADDRESS + "change_pass/", data=data)
     if "success" in response:
         return True
@@ -105,7 +105,7 @@ while True:
                 sync_Command2 = {'command': 'syncoff', 'src_path': '', 'dest_path': '', 'time': datetime.now()}
                 queue.put(sync_Command)
                 queue.put(sync_Command2)
-                print is_syncing()
+                # print is_syncing()
 
             else:
                 print "Now turning on sync. All modifications will be recorded from now on."
@@ -141,7 +141,7 @@ while True:
             print "Please log in to change your password."
 
     if input == "6":
-        print "program is exiting."
+        print "Exiting OneDir"
         os._exit(1)
 
 
